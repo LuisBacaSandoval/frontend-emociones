@@ -11,6 +11,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Download, Send, Trash2, Undo } from "lucide-react";
+import { downloadFile } from "@/lib/downloads";
 
 export default function DrawingCanvas({
   randomNumber,
@@ -147,60 +148,40 @@ export default function DrawingCanvas({
     ctx.putImageData(history[historyIndex - 1], 0, 0);
   };
 
-  const downloadX = async () => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+  const prepareData = async () => {
+    try {
+      const response = await fetch(
+        "https://backend-emociones-hr64.onrender.com/prepare",
+        {
+          method: "GET",
+        }
+      );
 
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-
-    // Normalizamos a escala de grises y convertimos en flat array
-    const grayscale = [];
-    for (let i = 0; i < imageData.data.length; i += 4) {
-      const r = imageData.data[i];
-      const g = imageData.data[i + 1];
-      const b = imageData.data[i + 2];
-      const gray = Math.round((r + g + b) / 3);
-      grayscale.push(gray);
-    }
-
-    const uint8Array = new Uint8Array(grayscale);
-
-    const res = await fetch("/api/download-x", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ data: Array.from(uint8Array) }),
-    });
-
-    if (res.ok) {
-      const blob = await res.blob();
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      link.download = "X.npy";
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
+      if (response.ok) {
+        const result = await response.json();
+        alert("Datos preparados correctamente.");
+        console.log(result); // para ver los detalles si los devuelve
+      } else {
+        alert("Hubo un problema al preparar los datos.");
+      }
+    } catch (error) {
+      console.error("Error al preparar los datos:", error);
+      alert("Error al preparar los datos.");
     }
   };
 
-  const downloadY = async () => {
-    const res = await fetch("/api/download-y", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ label: randomNumber }),
-    });
+  const downloadX = async () => {
+    await downloadFile(
+      "https://backend-emociones-hr64.onrender.com/X.npy",
+      "X.npy"
+    );
+  };
 
-    if (res.ok) {
-      const blob = await res.blob();
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      link.download = "y.npy";
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-    }
+  const downloadY = async () => {
+    await downloadFile(
+      "https://backend-emociones-hr64.onrender.com/y.npy",
+      "y.npy"
+    );
   };
 
   const sendDrawing = async () => {
@@ -208,14 +189,17 @@ export default function DrawingCanvas({
     if (!canvas) return;
 
     const dataURL = canvas.toDataURL("image/png");
-    const response = await fetch("/api/save-drawing", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        image: dataURL,
-        category: randomNumber, // 0, 1, 2
-      }),
-    });
+    const response = await fetch(
+      "https://backend-emociones-hr64.onrender.com/save-drawing",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          image: dataURL,
+          category: randomNumber, // 0, 1, 2
+        }),
+      }
+    );
 
     if (response.ok) {
       alert("Imagen enviada y guardada correctamente.");
@@ -299,35 +283,52 @@ export default function DrawingCanvas({
             </TooltipContent>
           </Tooltip>
 
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                className="bg-blue-600 hover:bg-blue-700"
-                onClick={downloadX}
-              >
-                <Download className="h-5 w-5 mr-2" />
-                <span>Descargar X.npy</span>
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Descarga el dataset X</p>
-            </TooltipContent>
-          </Tooltip>
+          <div className="space-x-2">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  className="bg-blue-600 hover:bg-blue-700"
+                  onClick={prepareData}
+                >
+                  <Download className="h-5 w-5 mr-2" />
+                  <span>Prepara los datos</span>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Descarga el dataset X</p>
+              </TooltipContent>
+            </Tooltip>
 
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                className="bg-red-600 hover:bg-red-700"
-                onClick={downloadY}
-              >
-                <Download className="h-5 w-5 mr-2" />
-                <span>Descargar y.npy</span>
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Descarga el dataset y</p>
-            </TooltipContent>
-          </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  className="bg-blue-600 hover:bg-blue-700"
+                  onClick={downloadX}
+                >
+                  <Download className="h-5 w-5 mr-2" />
+                  <span>Descargar X.npy</span>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Descarga el dataset X</p>
+              </TooltipContent>
+            </Tooltip>
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  className="bg-red-600 hover:bg-red-700"
+                  onClick={downloadY}
+                >
+                  <Download className="h-5 w-5 mr-2" />
+                  <span>Descargar y.npy</span>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Descarga el dataset y</p>
+              </TooltipContent>
+            </Tooltip>
+          </div>
         </div>
       </TooltipProvider>
 
