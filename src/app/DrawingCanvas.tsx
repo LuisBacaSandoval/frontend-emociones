@@ -151,7 +151,7 @@ export default function DrawingCanvas({
   const prepareData = async () => {
     try {
       const response = await fetch(
-        "https://backend-emociones-hr64.onrender.com/prepare",
+        "https://web-production-d267c.up.railway.app//prepare",
         {
           method: "GET",
         }
@@ -172,14 +172,14 @@ export default function DrawingCanvas({
 
   const downloadX = async () => {
     await downloadFile(
-      "https://backend-emociones-hr64.onrender.com/X.npy",
+      "https://web-production-d267c.up.railway.app//X.npy",
       "X.npy"
     );
   };
 
   const downloadY = async () => {
     await downloadFile(
-      "https://backend-emociones-hr64.onrender.com/y.npy",
+      "https://web-production-d267c.up.railway.app//y.npy",
       "y.npy"
     );
   };
@@ -190,7 +190,7 @@ export default function DrawingCanvas({
 
     const dataURL = canvas.toDataURL("image/png");
     const response = await fetch(
-      "https://backend-emociones-hr64.onrender.com/save-drawing",
+      "https://web-production-d267c.up.railway.app//save-drawing",
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
