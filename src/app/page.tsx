@@ -38,7 +38,7 @@ export default function Home() {
             height={100}
           />
           <h1 className="text-3xl md:text-4xl font-bold text-center mb-2 text-amber-800">
-            Dibuja tu emoción:{" "}
+            Dibuja tu emoción como el emoji:{" "}
             {randomNumber !== undefined ? EMOCIONES[randomNumber] : "..."}
           </h1>
         </div>

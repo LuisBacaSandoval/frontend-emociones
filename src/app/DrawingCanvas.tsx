@@ -26,6 +26,19 @@ export default function DrawingCanvas({
   const [historyIndex, setHistoryIndex] = useState(-1);
 
   useEffect(() => {
+    fetch("https://web-production-d267c.up.railway.app/total-images")
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Error al obtener el total de imágenes");
+        }
+        return response.json();
+      })
+      .then((data) => {
+        console.log("Total de imágenes:", data);
+      });
+  }, []);
+
+  useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -151,7 +164,7 @@ export default function DrawingCanvas({
   const prepareData = async () => {
     try {
       const response = await fetch(
-        "https://web-production-d267c.up.railway.app//prepare",
+        "https://web-production-d267c.up.railway.app/prepare",
         {
           method: "GET",
         }
@@ -172,14 +185,14 @@ export default function DrawingCanvas({
 
   const downloadX = async () => {
     await downloadFile(
-      "https://web-production-d267c.up.railway.app//X.npy",
+      "https://web-production-d267c.up.railway.app/X.npy",
       "X.npy"
     );
   };
 
   const downloadY = async () => {
     await downloadFile(
-      "https://web-production-d267c.up.railway.app//y.npy",
+      "https://web-production-d267c.up.railway.app/y.npy",
       "y.npy"
     );
   };
@@ -190,7 +203,7 @@ export default function DrawingCanvas({
 
     const dataURL = canvas.toDataURL("image/png");
     const response = await fetch(
-      "https://web-production-d267c.up.railway.app//save-drawing",
+      "https://web-production-d267c.up.railway.app/save-drawing",
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -287,7 +300,7 @@ export default function DrawingCanvas({
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
-                  className="bg-blue-600 hover:bg-blue-700"
+                  className="bg-yellow-600 hover:bg-yellow-700"
                   onClick={prepareData}
                 >
                   <Download className="h-5 w-5 mr-2" />
